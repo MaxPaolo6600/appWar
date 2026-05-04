@@ -8,14 +8,10 @@ const imgCaixa = require("../assets/img/caixa.png");
 const { width } = Dimensions.get('window');
 const CELL_SIZE = width / 6;
 
-const playerColors = [
-    "#ff0000",
-    "#00ff00",
-    "#0084ff",
-    "#8400ff"
-];
+export default function Game({ route }) {
+    const { jogadores } = route.params;
+    const playerColors = jogadores.map(j => j.cor);
 
-export default function Game() {
     const comecoJogo = Array(36).fill(null);
 
     comecoJogo[0] = { type: "color", value: playerColors[0] };
@@ -56,12 +52,13 @@ export default function Game() {
         const quadrado = nvoTabuleiro[index];
 
         if (quadrado?.type === "color") return;
-
         nvoTabuleiro[index] = { type: "color", value: playerColors[turno] };
         setTabuleiro(nvoTabuleiro);
 
-        navigation.navigate("Batalha");
-
+        navigation.navigate("Batalha", {
+            jogadores: jogadores,
+            turno: turno
+        });
         setTurno((turno + 1) % 4);
     }
 
@@ -106,6 +103,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: "#121212",
     },
     turn: {
         fontSize: 22,
