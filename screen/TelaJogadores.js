@@ -89,7 +89,7 @@ export default function TelaJogadores() {
                             style={styles.botao}
                             onPress={() => toggleDropdown(index)}
                         >
-                            <Text>{jogador.tipo || "Escolher vila"}</Text>
+                            <Text>{jogador.tipo || "Escolher tipo de vila"}</Text>
                         </TouchableOpacity>
                         {jogador.aberto && (
                             <View style={styles.dropdown}>

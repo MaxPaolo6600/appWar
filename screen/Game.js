@@ -51,15 +51,29 @@ export default function Game({ route }) {
         let nvoTabuleiro = [...tabuleiro];
         const quadrado = nvoTabuleiro[index];
 
-        if (quadrado?.type === "color") return;
+        if (quadrado && quadrado.type === "image") {
+            nvoTabuleiro[index] = { type: "color", value: playerColors[turno] };
+            setTabuleiro(nvoTabuleiro);
+
+            navigation.navigate("Batalha", {
+                jogadores: jogadores,
+                turno: turno,
+                interrogacao: "1",
+            });
+            setTurno((turno + 1) % jogadores.length);
+            return;
+        }
+
+        if (quadrado && quadrado.type === "color") return;
         nvoTabuleiro[index] = { type: "color", value: playerColors[turno] };
         setTabuleiro(nvoTabuleiro);
-
         navigation.navigate("Batalha", {
             jogadores: jogadores,
-            turno: turno
+            turno: turno,
+            interrogacao: "0",
         });
-        setTurno((turno + 1) % 4);
+
+        setTurno((turno + 1) % jogadores.length);
     }
 
     const renderItem = ({ item, index }) => (

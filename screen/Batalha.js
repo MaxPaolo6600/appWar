@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ImageBackground } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 import personagem from "../assets/img/img1.png";
 import moedaCara from "../assets/img/cara.png";
 import moedaCoroa from "../assets/img/coroa.png";
+import bau from "../assets/img/bau.png"
 
 export default function Batalha({ route }) {
+    const navigation = useNavigation();
+    const { jogadores, turno, interrogacao } = route.params;
 
-    const { jogadores, turno } = route.params;
     const VILAS = {
         "Vila forte": { vida: 10, ataque: 3 },
         "Vila agressiva": { vida: 7, ataque: 5 },
@@ -16,20 +19,77 @@ export default function Batalha({ route }) {
     };
 
     const jogadorAtual = jogadores[turno];
+    const [evento] = useState(() => {
+        if (interrogacao === "1") {
+            return Math.random() < 0.5 ? "rebeldes" : "iten";
+        }
+        return "normal";
+    });
+
+    const [iten, setIten] = useState(null);
+    const [dado, setDado] = useState(null);
+
+    function rolarDado() {
+        const d20 = Math.floor(Math.random() * 20) + 1;
+        setDado(d20);
+
+        let itemEscolhido;
+
+        if (d20 <= 7) {
+            itemEscolhido = Math.random() < 0.5
+                ? "Escudo Ruim - +3 defesa"
+                : "Armas Ruims - +2 ataque";
+        }
+        else if (d20 <= 14) {
+            itemEscolhido = Math.random() < 0.5
+                ? "Escudo Bom - +5 defesa"
+                : "Armas Boas - +4 ataque";
+        }
+        else {
+            itemEscolhido = Math.random() < 0.5
+                ? "Escudo Muito Bom - +7 defesa"
+                : "Armas Muito Boas - +5 ataque";
+        }
+
+        setIten(itemEscolhido);
+    }
+
     const [inimigo] = useState(() => {
-        const outros = jogadores.filter((_, i) => i !== turno);
-        return outros[Math.floor(Math.random() * outros.length)];
+        if (evento === "rebeldes") {
+            return {
+                nome: "Rebeldes",
+                cor: "#888",
+                tipo: "especial"
+            };
+        }
+
+        if (evento === "normal") {
+            const outros = jogadores.filter((_, i) => i !== turno);
+            return outros[Math.floor(Math.random() * outros.length)];
+        }
+
+        return null;
     });
 
     const statsJogador = VILAS[jogadorAtual.tipo];
-    const statsInimigo = VILAS[inimigo.tipo];
+
+    const statsInimigo = evento === "rebeldes"
+        ? { vida: 5, ataque: 3 }
+        : evento === "normal"
+            ? VILAS[inimigo.tipo]
+            : null;
+
     const [vidaJogador, setVidaJogador] = useState(statsJogador.vida);
-    const [vidaInimigo, setVidaInimigo] = useState(statsInimigo.vida);
+    const [vidaInimigo, setVidaInimigo] = useState(
+        statsInimigo ? statsInimigo.vida : 0
+    );
 
     const [vez, setVez] = useState(null);
     const [moeda, setMoeda] = useState(null);
 
     function jogarMoeda() {
+        if (!inimigo) return;
+
         const resultado = Math.random() < 0.5 ? "cara" : "coroa";
 
         if (resultado === "cara") {
@@ -42,7 +102,7 @@ export default function Batalha({ route }) {
     }
 
     function atacar() {
-        if (!vez) return;
+        if (!vez || !inimigo) return;
 
         if (vez === jogadorAtual.nome) {
             setVidaInimigo(v => Math.max(0, v - statsJogador.ataque));
@@ -51,6 +111,45 @@ export default function Batalha({ route }) {
             setVidaJogador(v => Math.max(0, v - statsInimigo.ataque));
             setVez(jogadorAtual.nome);
         }
+    }
+
+    if (evento === "iten") {
+        return (
+            <ImageBackground
+                source={bau}
+                style={styles.containerIten}
+                resizeMode="cover"
+            >
+                <View style={styles.containerIten2}>
+                    <View style={styles.containerIten3}>
+                        <Text style={styles.itenText}>
+                            Role o dado para descobrir qual iten vai ganhar!
+                        </Text>
+                        {dado && (
+                            <Text style={styles.itenText}>
+                                Dado: {dado}
+                            </Text>
+                        )}
+                        {iten && (
+                            <Text style={styles.itenText}>
+                                {iten}
+                            </Text>
+                        )}
+                        {!dado && (
+                            <TouchableOpacity style={styles.botao} onPress={rolarDado}>
+                                <Text style={styles.itenTextBtn}>Rolar D20</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                    <TouchableOpacity
+                        style={styles.botao}
+                        onPress={() => navigation.goBack()}
+                    >
+                        <Text style={styles.itenTextBtn}>Voltar</Text>
+                    </TouchableOpacity>
+                </View>
+            </ImageBackground>
+        );
     }
 
     return (
@@ -203,6 +302,24 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 18,
         marginBottom: 10,
-        fontWeight: "bold"
-    }
+        fontWeight: "bold",
+    },
+    containerIten: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    containerIten2: {
+        backgroundColor: 'rgba(0,0,0,0.60)',
+        width: "70%",
+        height: "60%",
+        padding: 30,
+        borderRadius: 30,
+        justifyContent: "space-between",
+    },
+    itenText: {
+        color: "#fff",
+        fontSize: 22,
+        textAlign: "center",
+    },
 });
