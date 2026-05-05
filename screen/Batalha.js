@@ -5,7 +5,8 @@ import { useNavigation } from '@react-navigation/native';
 import personagem from "../assets/img/img1.png";
 import moedaCara from "../assets/img/cara.png";
 import moedaCoroa from "../assets/img/coroa.png";
-import bau from "../assets/img/bau.png"
+import bau from "../assets/img/bau.png";
+import d20 from "../assets/img/d20.png";
 
 export default function Batalha({ route }) {
     const navigation = useNavigation();
@@ -130,17 +131,17 @@ export default function Batalha({ route }) {
                                 Dado: {dado}
                             </Text>
                         )}
-                        {iten && (
-                            <Text style={styles.itenText}>
-                                {iten}
-                            </Text>
-                        )}
                         {!dado && (
-                            <TouchableOpacity style={styles.botao} onPress={rolarDado}>
-                                <Text style={styles.itenTextBtn}>Rolar D20</Text>
+                            <TouchableOpacity onPress={rolarDado}>
+                                <Image source={d20} />
                             </TouchableOpacity>
                         )}
                     </View>
+                    {iten && (
+                        <Text style={styles.itenText2}>
+                            {iten}
+                        </Text>
+                    )}
                     <TouchableOpacity
                         style={styles.botao}
                         onPress={() => navigation.goBack()}
@@ -321,5 +322,13 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 22,
         textAlign: "center",
+    },
+    itenText2: {
+        backgroundColor: "#fff",
+        height: 30,
+        borderRadius: 7,
+        textAlign: 'center',
+        padding: 5,
+        color: "blue",
     },
 });
